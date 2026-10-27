@@ -36,7 +36,15 @@ A 3-block **Convolutional Neural Network** that distinguishes dog and cat images
 
 ### 🔤 [Transformer Based Next Token Prediction](./Transformer%20Based%20Next%20Token%20Prediction/)
 
-*(Coming soon)*
+A decoder-only **Transformer Language Model** built from scratch using multi-head causal self-attention and positional encoding. Predicts the next token/character auto-regressively with temperature sampling. Single file, zero boilerplate.
+
+| Property | Value |
+|----------|-------|
+| Task | Auto-regressive Next-Token Prediction |
+| Architecture | Decoder-only Transformer (Causal MHSA + FFN + Positional Encoding) |
+| Framework | TensorFlow / Keras |
+| Dataset | Built-in literary corpus (or custom text file) |
+| Entry Point | `python transformer_next_token.py train` |
 
 ---
 
@@ -54,13 +62,13 @@ Then follow the instructions in that project's `README.md`.
 
 ## 🔑 Common Concepts Across Projects
 
-| Concept | Moons ANN | Dog Cat CNN |
-|---------|-----------|-------------|
-| Single-file design | ✅ | ✅ |
-| Reproducible seeds | ✅ | ✅ |
-| Early stopping | ✅ | ✅ |
-| Train/val split | ✅ | ✅ |
-| Confusion matrix plot | ✅ | ✅ |
-| Model checkpoint | ✅ | ✅ |
-| Data augmentation | — | ✅ |
-| tf.data pipeline | — | ✅ |
+| Concept | Moons ANN | Dog Cat CNN | Transformer Next Token |
+|---------|-----------|-------------|------------------------|
+| Single-file design | ✅ | ✅ | ✅ |
+| Reproducible seeds | ✅ | ✅ | ✅ |
+| Early stopping | ✅ | ✅ | ✅ |
+| Train/val split | ✅ | ✅ | ✅ |
+| Evaluation / Loss curves | ✅ | ✅ | ✅ |
+| Model checkpoint | ✅ | ✅ | ✅ |
+| Custom layer / block math | — | — | ✅ (Attention, PosEnc, Block) |
+| Data augmentation / pipeline | — | ✅ (tf.data) | ✅ (tf.data) |

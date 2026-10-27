@@ -38,8 +38,8 @@ conda-env/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# ── Trained Models ───────────────────────────
-*.keras
+# ── Trained Models (keeping .keras trackable) ─
+# *.keras  <- Removed from ignore as requested (allows .keras models to be tracked)
 *.h5
 *.hdf5
 *.pkl
@@ -125,6 +125,10 @@ config/secrets/
 tmp/
 temp/
 _temp_extract/
+
+# ── Project Deep-Dive Notes (Ignored from Git) ──
+[Pp]roject.md
+**/[Pp]roject.md
 
 # ── Coverage & Testing ───────────────────────
 htmlcov/
