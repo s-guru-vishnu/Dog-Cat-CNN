@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+data/
+archive/
+Output/
+Project.md
+project.md
+*.tmp
+*.log
+

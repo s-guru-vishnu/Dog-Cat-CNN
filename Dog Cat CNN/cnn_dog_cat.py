@@ -26,10 +26,6 @@ from tensorflow.keras import layers, models
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
 
-# ════════════════════════════════════════════════════════════
-#  CONFIGURATION  — edit these to customise the run
-# ════════════════════════════════════════════════════════════
-
 RANDOM_SEED      = 42
 IMAGE_SIZE       = (128, 128)     # (height, width)
 BATCH_SIZE       = 32
@@ -52,10 +48,6 @@ tf.random.set_seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
 
-
-# ════════════════════════════════════════════════════════════
-#  DATA  ── loading, validation, augmentation
-# ════════════════════════════════════════════════════════════
 
 def _valid_image(path: str) -> bool:
     """Return True if the image file is readable and not corrupted."""
@@ -117,7 +109,7 @@ def _extract_zip(zip_path: str, out: str = "data") -> Tuple[int, int]:
     os.makedirs(dogs_dir, exist_ok=True)
     tmp = os.path.join(out, "_tmp_extract")
     os.makedirs(tmp, exist_ok=True)
-    print(f"Extracting '{zip_path}'…")
+    print(f"Extracting '{zip_path}'...")
     with zipfile.ZipFile(zip_path, "r") as zf:
         zf.extractall(tmp)
     valid_ext = {".jpg", ".jpeg", ".png", ".bmp"}
@@ -151,7 +143,6 @@ def _collect_paths(
     cats_dir = os.path.join(data_dir, "cats")
     dogs_dir = os.path.join(data_dir, "dogs")
 
-    # Auto-setup if folders are missing or empty
     if (
         not os.path.isdir(cats_dir) or not os.path.isdir(dogs_dir)
         or len(os.listdir(cats_dir)) == 0 or len(os.listdir(dogs_dir)) == 0
@@ -232,10 +223,6 @@ def build_datasets() -> Tuple[tf.data.Dataset, tf.data.Dataset, int, int]:
     return train_ds, val_ds, n_train, n_val
 
 
-# ════════════════════════════════════════════════════════════
-#  MODEL  ── 3-block CNN
-# ════════════════════════════════════════════════════════════
-
 def build_model() -> models.Sequential:
     """Build and compile a 3-block CNN for cat vs dog binary classification."""
     reg = tf.keras.regularizers.l2(L2_REG) if L2_REG > 0 else None
@@ -243,22 +230,18 @@ def build_model() -> models.Sequential:
     m = models.Sequential(name="dog_cat_cnn")
     m.add(layers.Input(shape=(*IMAGE_SIZE, 3)))
 
-    # Block 1 — edges & gradients
     m.add(layers.Conv2D(32,  (3, 3), activation="relu", padding="same",
                         kernel_initializer="he_normal", kernel_regularizer=reg))
     m.add(layers.MaxPooling2D((2, 2)))
 
-    # Block 2 — corners & textures
     m.add(layers.Conv2D(64,  (3, 3), activation="relu", padding="same",
                         kernel_initializer="he_normal", kernel_regularizer=reg))
     m.add(layers.MaxPooling2D((2, 2)))
 
-    # Block 3 — shapes & silhouettes
     m.add(layers.Conv2D(128, (3, 3), activation="relu", padding="same",
                         kernel_initializer="he_normal", kernel_regularizer=reg))
     m.add(layers.MaxPooling2D((2, 2)))
 
-    # Classification head
     m.add(layers.Flatten())
     m.add(layers.Dense(128, activation="relu",
                        kernel_initializer="he_normal", kernel_regularizer=reg))
@@ -273,16 +256,11 @@ def build_model() -> models.Sequential:
     return m
 
 
-# ════════════════════════════════════════════════════════════
-#  TRAINING
-# ════════════════════════════════════════════════════════════
-
 def train():
     print("=" * 60)
-    print("   Dog vs Cat CNN — Training")
+    print("   Dog vs Cat CNN -- Training")
     print("=" * 60)
 
-    # GPU check
     gpus = tf.config.list_physical_devices("GPU")
     if gpus:
         try:
@@ -318,7 +296,6 @@ def train():
     elapsed = time.time() - t0
     print(f"\nTraining done in {elapsed:.1f}s ({elapsed/60:.2f} min)")
 
-    # Persist history for later use by evaluate()
     hist_json = {
         "epochs_completed": len(history.history["loss"]),
         "training_time_seconds": round(elapsed, 2),
@@ -335,16 +312,11 @@ def train():
     best = int(np.argmin(history.history["val_loss"])) + 1
     best_acc = history.history["val_accuracy"][best - 1]
     print(f"Best epoch: {best}  |  Val Accuracy: {best_acc*100:.2f}%")
-    print(f"Model  → {MODEL_FILE}")
-    print(f"Output → {OUTPUT_DIR}/\n")
+    print(f"Model  -> {MODEL_FILE}")
+    print(f"Output -> {OUTPUT_DIR}/\n")
 
-    # Immediately plot training curves
     _plot_curves(hist_json["history"])
 
-
-# ════════════════════════════════════════════════════════════
-#  EVALUATION  ── metrics + plots
-# ════════════════════════════════════════════════════════════
 
 def _plot_curves(h: dict):
     """Save accuracy and loss curves to Output/."""
@@ -353,7 +325,6 @@ def _plot_curves(h: dict):
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 5), dpi=150)
 
-    # Accuracy
     axes[0].plot(epochs, h["accuracy"],     "o-",  label="Train",      color="steelblue", linewidth=2)
     axes[0].plot(epochs, h["val_accuracy"], "s--", label="Validation",  color="coral",     linewidth=2)
     best_e = int(np.argmax(h["val_accuracy"])) + 1
@@ -362,7 +333,6 @@ def _plot_curves(h: dict):
     axes[0].set_xlabel("Epoch"); axes[0].set_ylabel("Accuracy")
     axes[0].legend(); axes[0].grid(True, linestyle="--", alpha=0.5)
 
-    # Loss
     axes[1].plot(epochs, h["loss"],     "o-",  label="Train",      color="#D97706", linewidth=2)
     axes[1].plot(epochs, h["val_loss"], "s--", label="Validation",  color="#DC2626", linewidth=2)
     min_e = int(np.argmin(h["val_loss"])) + 1
@@ -385,7 +355,7 @@ def evaluate():
             "  python cnn_dog_cat.py train"
         )
 
-    print(f"Evaluating '{MODEL_FILE}' …")
+    print(f"Evaluating '{MODEL_FILE}' ...")
     gpus = tf.config.list_physical_devices("GPU")
     if gpus:
         try:
@@ -426,7 +396,6 @@ def evaluate():
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # ── Confusion Matrix ──────────────────────────────────
     plt.figure(figsize=(6, 5), dpi=150)
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
                 xticklabels=["Cat (0)", "Dog (1)"],
@@ -440,7 +409,6 @@ def evaluate():
     plt.close()
     print(f"Saved: {OUTPUT_DIR}/confusion_matrix.png")
 
-    # ── Sample Predictions Grid ───────────────────────────
     if sample_imgs:
         fig, axes = plt.subplots(3, 4, figsize=(12, 9), dpi=150)
         axes = axes.flatten()
@@ -460,13 +428,11 @@ def evaluate():
         plt.close()
         print(f"Saved: {OUTPUT_DIR}/sample_predictions.png")
 
-    # ── Training Curves (if history exists) ──────────────
     hist_path = os.path.join(OUTPUT_DIR, "history.json")
     if os.path.exists(hist_path):
         with open(hist_path) as f:
             _plot_curves(json.load(f)["history"])
 
-    # ── Console Report ────────────────────────────────────
     print(f"\nValidation Samples : {len(y_true)}")
     print(f"Accuracy           : {acc * 100:.2f}%")
     print(f"Precision (Dog)    : {prec:.4f}")
@@ -476,10 +442,6 @@ def evaluate():
     print(classification_report(y_true, y_pred,
                                 target_names=["Cat (0)", "Dog (1)"], digits=4))
 
-
-# ════════════════════════════════════════════════════════════
-#  SINGLE-IMAGE PREDICTION
-# ════════════════════════════════════════════════════════════
 
 _model_cache: Optional[tf.keras.Model] = None
 _model_cache_path: Optional[str]       = None
@@ -562,19 +524,14 @@ def predict_image(
     return result
 
 
-# ════════════════════════════════════════════════════════════
-#  ENTRY POINT
-# ════════════════════════════════════════════════════════════
-
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Dog vs Cat CNN  ──  train | evaluate | predict"
+        description="Dog vs Cat CNN  --  train | evaluate | predict"
     )
     sub = parser.add_subparsers(dest="cmd")
 
-    # ── train ─────────────────────────────────────────────
     tp = sub.add_parser("train", help="Train the CNN on your dataset")
     tp.add_argument("--epochs",        type=int,   default=EPOCHS)
     tp.add_argument("--batch-size",    type=int,   default=BATCH_SIZE)
@@ -582,11 +539,9 @@ if __name__ == "__main__":
     tp.add_argument("--sample-limit",  type=int,   default=SAMPLE_LIMIT)
     tp.add_argument("--data-dir",      type=str,   default=DATA_DIR)
 
-    # ── evaluate ──────────────────────────────────────────
     ep = sub.add_parser("evaluate", help="Evaluate saved model and save plots")
     ep.add_argument("--data-dir", type=str, default=DATA_DIR)
 
-    # ── predict ───────────────────────────────────────────
     pp = sub.add_parser("predict", help="Classify a single image")
     pp.add_argument("--image",    type=str, required=True)
     pp.add_argument("--save-viz", type=str, default=None,

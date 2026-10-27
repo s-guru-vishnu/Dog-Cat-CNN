@@ -1,10 +1,10 @@
-# 🌙 Moons Dataset ANN
+# Moons Dataset ANN
 
 A self-contained **Artificial Neural Network (ANN)** that learns to classify the classic two-moons dataset — a non-linearly separable binary classification benchmark — using TensorFlow/Keras.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Moons Dataset ANN/
@@ -19,7 +19,7 @@ Moons Dataset ANN/
 
 ---
 
-## 🧠 What Is the Moons Dataset?
+## What Is the Moons Dataset?
 
 `make_moons` from scikit-learn generates two interleaving half-circle clusters that **cannot** be separated by a straight line. It is a standard benchmark for testing non-linear classifiers.
 
@@ -32,7 +32,7 @@ Class 0  ●●●●●    Class 1  ○○○○○
 
 ---
 
-## 🏗️ Model Architecture
+## ️ Model Architecture
 
 | Layer            | Units / Filters | Activation | Notes              |
 |------------------|-----------------|------------|--------------------|
@@ -50,7 +50,7 @@ Class 0  ●●●●●    Class 1  ○○○○○
 
 ---
 
-## ⚙️ Configuration
+## ️ Configuration
 
 All hyperparameters are defined as constants at the top of [`ann_moons.py`](ann_moons.py):
 
@@ -66,7 +66,7 @@ All hyperparameters are defined as constants at the top of [`ann_moons.py`](ann_
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Install dependencies
 
@@ -90,7 +90,7 @@ The script will:
 
 ---
 
-## 📊 Outputs
+## Outputs
 
 | File | Description |
 |------|-------------|
@@ -101,7 +101,7 @@ The script will:
 
 ---
 
-## 📦 Requirements
+## Requirements
 
 ```
 tensorflow>=2.12.0
@@ -120,7 +120,7 @@ pip install -r requirements.txt
 
 ---
 
-## 📈 Expected Results
+## Expected Results
 
 | Metric   | Approximate Value |
 |----------|-------------------|
@@ -131,7 +131,7 @@ pip install -r requirements.txt
 
 ---
 
-## 🔑 Key Concepts Demonstrated
+## Key Concepts Demonstrated
 
 - **Non-linear classification** with a multi-layer perceptron  
 - **Dropout regularisation** to prevent overfitting  

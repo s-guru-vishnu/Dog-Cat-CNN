@@ -1,10 +1,10 @@
-# 🤖 Transformer-Based Next-Token Prediction
+# Transformer-Based Next-Token Prediction
 
 A self-contained **Transformer language model** that learns to predict the next character in a text sequence — built from scratch using TensorFlow/Keras with explicit Multi-Head Self-Attention and Positional Encoding. Everything is in one file.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Transformer Based Next Token Prediction/
@@ -21,7 +21,7 @@ Transformer Based Next Token Prediction/
 
 ---
 
-## 🏗️ Model Architecture
+## ️ Model Architecture
 
 ```
 Token IDs (B, L)
@@ -67,7 +67,7 @@ Token IDs (B, L)
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 pip install -r requirements.txt
@@ -87,7 +87,7 @@ python transformer_next_token.py visualize --seed "The sun rose"
 
 ---
 
-## 🌡️ Temperature Sampling
+## ️ Temperature Sampling
 
 | Temperature | Effect |
 |-------------|--------|
@@ -98,7 +98,7 @@ python transformer_next_token.py visualize --seed "The sun rose"
 
 ---
 
-## 📊 Output Files
+## Output Files
 
 | File | Description |
 |------|-------------|
@@ -110,7 +110,7 @@ python transformer_next_token.py visualize --seed "The sun rose"
 
 ---
 
-## 📦 Requirements
+## Requirements
 
 ```
 tensorflow>=2.15.0

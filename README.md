@@ -1,74 +1,75 @@
-# 🤖 ML Training Workshop
+# ML Training Workshop
 
 A collection of self-contained machine learning projects, each demonstrating a core deep learning concept with clean, runnable code.
 
 ---
 
-## 📂 Projects
+## Projects
 
-### 🌙 [Moons Dataset ANN](./Moons%20Dataset%20ANN/)
+### [Moons Dataset ANN](./Moons%20Dataset%20ANN/)
 
-A fully-connected **Artificial Neural Network** that classifies the non-linearly separable two-moons dataset. Single file, zero boilerplate.
+A fully-connected Artificial Neural Network that classifies the non-linearly separable two-moons dataset. Single file, zero boilerplate.
 
 | Property | Value |
-|----------|-------|
+|---|---|
 | Task | Binary Classification |
 | Architecture | ANN (Dense + Dropout) |
 | Framework | TensorFlow / Keras |
-| Dataset | `make_moons` (scikit-learn) |
-| Entry Point | `python ann_moons.py` |
+| Dataset | make_moons (scikit-learn) |
+| Entry Point | python ann_moons.py |
 
 ---
 
-### 🐾 [Dog Cat CNN](./Dog%20Cat%20CNN/)
+### [Dog Cat CNN](./Dog%20Cat%20CNN/)
 
-A 3-block **Convolutional Neural Network** that distinguishes dog and cat images. Single file with train / evaluate / predict sub-commands.
+A 3-block Convolutional Neural Network that distinguishes dog and cat images. Single file with train, evaluate, and predict commands.
 
 | Property | Value |
-|----------|-------|
+|---|---|
 | Task | Binary Image Classification |
-| Architecture | CNN (3× Conv2D + MaxPool + Dense) |
+| Architecture | CNN (3x Conv2D + MaxPool + Dense) |
 | Framework | TensorFlow / Keras |
 | Dataset | Kaggle Dogs vs. Cats |
-| Entry Point | `python cnn_dog_cat.py train` |
+| Entry Point | python cnn_dog_cat.py train |
 
 ---
 
-### 🔤 [Transformer Based Next Token Prediction](./Transformer%20Based%20Next%20Token%20Prediction/)
+### [Transformer Based Next Token Prediction](./Transformer%20Based%20Next%20Token%20Prediction/)
 
-A decoder-only **Transformer Language Model** built from scratch using multi-head causal self-attention and positional encoding. Predicts the next token/character auto-regressively with temperature sampling. Single file, zero boilerplate.
+A decoder-only Transformer Language Model built from scratch using multi-head causal self-attention and positional encoding. Predicts the next token/character auto-regressively with temperature sampling. Single file, zero boilerplate.
 
 | Property | Value |
-|----------|-------|
+|---|---|
 | Task | Auto-regressive Next-Token Prediction |
 | Architecture | Decoder-only Transformer (Causal MHSA + FFN + Positional Encoding) |
 | Framework | TensorFlow / Keras |
 | Dataset | Built-in literary corpus (or custom text file) |
-| Entry Point | `python transformer_next_token.py train` |
+| Entry Point | python transformer_next_token.py train |
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-Each project is self-contained with its own `requirements.txt`. Navigate into any project folder and install:
+Each project is self-contained with its own requirements.txt. Navigate into any project folder and install:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Then follow the instructions in that project's `README.md`.
+Then follow the instructions in that project's README.md.
 
 ---
 
-## 🔑 Common Concepts Across Projects
+## Common Concepts Across Projects
 
 | Concept | Moons ANN | Dog Cat CNN | Transformer Next Token |
-|---------|-----------|-------------|------------------------|
-| Single-file design | ✅ | ✅ | ✅ |
-| Reproducible seeds | ✅ | ✅ | ✅ |
-| Early stopping | ✅ | ✅ | ✅ |
-| Train/val split | ✅ | ✅ | ✅ |
-| Evaluation / Loss curves | ✅ | ✅ | ✅ |
-| Model checkpoint | ✅ | ✅ | ✅ |
-| Custom layer / block math | — | — | ✅ (Attention, PosEnc, Block) |
-| Data augmentation / pipeline | — | ✅ (tf.data) | ✅ (tf.data) |
+|---|---|---|---|
+| Single-file design | Yes | Yes | Yes |
+| Reproducible seeds | Yes | Yes | Yes |
+| Early stopping | Yes | Yes | Yes |
+| Train/val split | Yes | Yes | Yes |
+| Evaluation / Loss curves | Yes | Yes | Yes |
+| Model checkpoint | Yes | Yes | Yes |
+| Custom layer / block math | No | No | Yes (Attention, PosEnc, Block) |
+| Data augmentation / pipeline | No | Yes (tf.data) | Yes (tf.data) |
+

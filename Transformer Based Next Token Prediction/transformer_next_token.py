@@ -16,10 +16,6 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 
 
-# ════════════════════════════════════════════════════════════
-#  CONFIGURATION
-# ════════════════════════════════════════════════════════════
-
 RANDOM_SEED    = 42
 SEQ_LEN        = 64        # tokens the model sees at once (context window)
 EMBED_DIM      = 128       # token embedding size
@@ -38,8 +34,6 @@ tf.random.set_seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
 
-# ── Built-in mini corpus (no downloads needed) ───────────────
-# A short excerpt used when no custom text file is provided.
 _BUILTIN_TEXT = """
 The sun rose over the mountains, casting golden light across the quiet valley.
 Birds began to sing their morning songs as the mist slowly lifted from the river.
@@ -78,17 +72,13 @@ Then she began the descent, step by careful step, into the unknown country beyon
 """
 
 
-# ════════════════════════════════════════════════════════════
-#  TOKENISER  ── character-level vocabulary
-# ════════════════════════════════════════════════════════════
-
 class CharTokenizer:
     """
     Maps every unique character in a corpus to an integer id and back.
 
     Attributes
     ----------
-    vocab_size : int          – number of unique characters
+    vocab_size : int          - number of unique characters
     char2id    : dict[str,int]
     id2char    : dict[int,str]
     """
@@ -156,10 +146,6 @@ def make_dataset(
     return ds
 
 
-# ════════════════════════════════════════════════════════════
-#  ARCHITECTURE  ── Transformer components
-# ════════════════════════════════════════════════════════════
-
 class PositionalEncoding(layers.Layer):
     """
     Adds sinusoidal positional information to token embeddings.
@@ -177,7 +163,6 @@ class PositionalEncoding(layers.Layer):
         self.seq_len   = seq_len
         self.embed_dim = embed_dim
 
-        # Pre-compute the encoding matrix  [seq_len, embed_dim]
         positions = np.arange(seq_len)[:, np.newaxis]          # (L, 1)
         dims      = np.arange(embed_dim)[np.newaxis, :]         # (1, D)
         angles    = positions / np.power(10000, (2 * (dims // 2)) / embed_dim)
@@ -199,13 +184,13 @@ class CausalMultiHeadSelfAttention(layers.Layer):
     Multi-Head Self-Attention with a causal (look-ahead) mask.
 
     Steps for each forward pass
-    ───────────────────────────
+    ---------------------------
     1. Project input X into Q, K, V matrices using learned linear layers.
     2. Split Q, K, V across `num_heads` attention heads.
     3. Compute scaled dot-product scores:  scores = QKᵀ / √d_k
-    4. Apply causal mask: positions j > i get score −∞ (→ 0 after softmax)
-       so token i can only attend to tokens 0 … i (no future peeking).
-    5. Softmax → attention weights  α
+    4. Apply causal mask: positions j > i get score −∞ (-> 0 after softmax)
+       so token i can only attend to tokens 0 ... i (no future peeking).
+    5. Softmax -> attention weights  α
     6. Weighted sum: output = α · V
     7. Concatenate heads and project back to embed_dim.
 
@@ -230,7 +215,6 @@ class CausalMultiHeadSelfAttention(layers.Layer):
         self.drop = layers.Dropout(dropout)
 
     def _split_heads(self, x, batch):
-        # x: (B, L, D) → (B, H, L, d_k)
         x = tf.reshape(x, (batch, -1, self.num_heads, self.d_k))
         return tf.transpose(x, [0, 2, 1, 3])
 
@@ -242,11 +226,9 @@ class CausalMultiHeadSelfAttention(layers.Layer):
         K = self._split_heads(self.W_k(x), B)
         V = self._split_heads(self.W_v(x), B)
 
-        # Scaled dot-product attention scores
         scale  = tf.math.sqrt(tf.cast(self.d_k, tf.float32))
         scores = tf.matmul(Q, K, transpose_b=True) / scale   # (B, H, L, L)
 
-        # Causal mask: upper triangle → -1e9 so softmax → 0
         mask = 1 - tf.linalg.band_part(tf.ones((L, L)), -1, 0)
         scores -= mask * 1e9
 
@@ -268,8 +250,8 @@ class CausalMultiHeadSelfAttention(layers.Layer):
 class TransformerBlock(layers.Layer):
     """
     One Transformer decoder block:
-        x → LayerNorm → CausalMHSA → Dropout → residual
-          → LayerNorm → FFN         → Dropout → residual
+        x -> LayerNorm -> CausalMHSA -> Dropout -> residual
+          -> LayerNorm -> FFN         -> Dropout -> residual
 
     The Feed-Forward Network (FFN) is a two-layer MLP applied
     independently to every position:
@@ -326,25 +308,22 @@ def build_transformer_lm(
 
     Pipeline
     --------
-    token ids → Embedding → + PositionalEncoding → Dropout
-              → TransformerBlock × num_layers
-              → LayerNorm → Dense(vocab_size)  ← output logits
+    token ids -> Embedding -> + PositionalEncoding -> Dropout
+              -> TransformerBlock x num_layers
+              -> LayerNorm -> Dense(vocab_size)  ← output logits
     """
     inp = layers.Input(shape=(seq_len,), dtype=tf.int32, name="token_ids")
 
-    # Token + position embeddings
     x = layers.Embedding(vocab_size, embed_dim, name="token_embedding")(inp)
     x = PositionalEncoding(seq_len, embed_dim, name="pos_encoding")(x)
     x = layers.Dropout(dropout, name="embed_dropout")(x)
 
-    # Stack of Transformer blocks
     for i in range(num_layers):
         x = TransformerBlock(embed_dim, num_heads, ff_dim, dropout,
                              name=f"transformer_block_{i}")(x)
 
     x = layers.LayerNormalization(epsilon=1e-6, name="final_norm")(x)
 
-    # Project to vocabulary logits
     logits = layers.Dense(vocab_size, name="lm_head")(x)
 
     model = Model(inputs=inp, outputs=logits, name="transformer_lm")
@@ -356,10 +335,6 @@ def build_transformer_lm(
     return model
 
 
-# ════════════════════════════════════════════════════════════
-#  TRAINING
-# ════════════════════════════════════════════════════════════
-
 def train(text_file: Optional[str] = None):
     """
     Train the Transformer language model.
@@ -369,10 +344,9 @@ def train(text_file: Optional[str] = None):
     text_file : path to a UTF-8 text file.  If None, the built-in corpus is used.
     """
     print("=" * 60)
-    print("   Transformer Next-Token Prediction — Training")
+    print("   Transformer Next-Token Prediction -- Training")
     print("=" * 60)
 
-    # ── Corpus ────────────────────────────────────────────
     if text_file and os.path.isfile(text_file):
         with open(text_file, encoding="utf-8") as f:
             text = f.read()
@@ -380,12 +354,11 @@ def train(text_file: Optional[str] = None):
     else:
         text = _BUILTIN_TEXT
         if text_file:
-            print(f"'{text_file}' not found — using built-in corpus.")
+            print(f"'{text_file}' not found -- using built-in corpus.")
         else:
             print("Using built-in corpus.")
     print(f"Corpus length: {len(text):,} characters")
 
-    # ── Tokenise ─────────────────────────────────────────
     tok = CharTokenizer().fit(text)
     print(f"Vocabulary size: {tok.vocab_size} characters")
     ids = tok.encode(text)
@@ -393,7 +366,6 @@ def train(text_file: Optional[str] = None):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     tok.save(os.path.join(OUTPUT_DIR, "tokenizer.json"))
 
-    # ── Split 90 / 10 ────────────────────────────────────
     split      = int(0.9 * len(ids))
     train_ids  = ids[:split]
     val_ids    = ids[split:]
@@ -402,7 +374,6 @@ def train(text_file: Optional[str] = None):
     train_ds = make_dataset(train_ids)
     val_ds   = make_dataset(val_ids)
 
-    # ── Model ────────────────────────────────────────────
     model = build_transformer_lm(vocab_size=tok.vocab_size)
     model.summary()
 
@@ -427,9 +398,8 @@ def train(text_file: Optional[str] = None):
     )
     elapsed = time.time() - t0
     print(f"\nTraining done in {elapsed:.1f}s ({elapsed/60:.2f} min)")
-    print(f"Model → {MODEL_FILE}")
+    print(f"Model -> {MODEL_FILE}")
 
-    # Save history
     hist_path = os.path.join(OUTPUT_DIR, "history.json")
     hist_dict = {
         "epochs_completed": len(history.history["loss"]),
@@ -446,17 +416,12 @@ def train(text_file: Optional[str] = None):
 
     _plot_training_curves(hist_dict["history"])
 
-    # Quick generation demo
-    print("\n── Sample generation after training ──")
+    print("\n-- Sample generation after training --")
     seed_text = text[:40]
     generated = generate(seed_text, length=200, temperature=0.8, tok=tok)
     print(f"Seed : {repr(seed_text)}")
     print(f"Output:\n{generated}\n")
 
-
-# ════════════════════════════════════════════════════════════
-#  TEXT GENERATION
-# ════════════════════════════════════════════════════════════
 
 def generate(
     seed_text: str,
@@ -469,17 +434,17 @@ def generate(
     Auto-regressively generate `length` new characters given a seed string.
 
     How temperature works
-    ─────────────────────
-    logits → divide by T → softmax → sample
-    • T < 1 : sharper distribution → more predictable / repetitive
+    ---------------------
+    logits -> divide by T -> softmax -> sample
+    • T < 1 : sharper distribution -> more predictable / repetitive
     • T = 1 : raw model distribution
-    • T > 1 : flatter distribution → more creative / random
+    • T > 1 : flatter distribution -> more creative / random
 
     Parameters
     ----------
     seed_text   : prompt string (must be at least 1 char in vocab)
     length      : number of characters to generate
-    temperature : sampling temperature  (0 < T, typically 0.5–1.5)
+    temperature : sampling temperature  (0 < T, typically 0.5-1.5)
     tok         : CharTokenizer (loaded from Output/ if None)
     model       : Keras model (loaded from MODEL_FILE if None)
     """
@@ -504,7 +469,6 @@ def generate(
     generated = list(ids)
 
     for _ in range(length):
-        # Feed the last SEQ_LEN tokens as context
         context = generated[-SEQ_LEN:]
         pad_len = SEQ_LEN - len(context)
         padded  = [0] * pad_len + context          # left-pad with 0
@@ -513,19 +477,13 @@ def generate(
         logits  = model.predict(inp, verbose=0)[0]  # (SEQ_LEN, vocab_size)
         last_logits = logits[len(context) - 1]       # prediction after last token
 
-        # Temperature sampling
         scaled  = last_logits / max(temperature, 1e-8)
         probs   = tf.nn.softmax(scaled).numpy()
         next_id = np.random.choice(len(probs), p=probs)
         generated.append(next_id)
 
-    # Return only the newly generated part
     return tok.decode(generated[len(ids):])
 
-
-# ════════════════════════════════════════════════════════════
-#  VISUALISATION
-# ════════════════════════════════════════════════════════════
 
 def _plot_training_curves(h: dict):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -545,7 +503,7 @@ def _plot_training_curves(h: dict):
     axes[1].set_xlabel("Epoch"); axes[1].set_ylabel("Token Accuracy")
     axes[1].legend(); axes[1].grid(True, linestyle="--", alpha=0.5)
 
-    plt.suptitle("Transformer LM — Training Metrics", fontsize=15, fontweight="bold", y=1.02)
+    plt.suptitle("Transformer LM -- Training Metrics", fontsize=15, fontweight="bold", y=1.02)
     plt.tight_layout()
     out_path = os.path.join(OUTPUT_DIR, "training_curves.png")
     plt.savefig(out_path, bbox_inches="tight")
@@ -587,10 +545,8 @@ def visualize_attention(
     L       = len(ids)
     labels  = list(seed_text[:L])
 
-    # Build a sub-model that outputs attention weights from first block
     try:
         attn_layer = model.get_layer("transformer_block_0").attn
-        # Run a pass manually to capture weights
         emb_layer   = model.get_layer("token_embedding")
         pos_layer   = model.get_layer("pos_encoding")
         norm1_layer = model.get_layer("transformer_block_0").norm1
@@ -616,7 +572,7 @@ def visualize_attention(
             ax.tick_params(axis="x", rotation=45, labelsize=8)
             ax.tick_params(axis="y", rotation=0,  labelsize=8)
 
-        plt.suptitle(f'Attention Weights — Block 0\nSeed: "{seed_text[:L]}"',
+        plt.suptitle(f'Attention Weights -- Block 0\nSeed: "{seed_text[:L]}"',
                      fontsize=13, fontweight="bold")
         plt.tight_layout()
         out_path = os.path.join(OUTPUT_DIR, "attention_map.png")
@@ -627,19 +583,14 @@ def visualize_attention(
         print(f"Attention visualisation skipped: {e}")
 
 
-# ════════════════════════════════════════════════════════════
-#  ENTRY POINT
-# ════════════════════════════════════════════════════════════
-
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Transformer Next-Token Prediction  ──  train | generate | visualize"
+        description="Transformer Next-Token Prediction  --  train | generate | visualize"
     )
     sub = parser.add_subparsers(dest="cmd")
 
-    # ── train ─────────────────────────────────────────────
     tp = sub.add_parser("train", help="Train the Transformer language model")
     tp.add_argument("--text-file",   type=str,   default=None,
                     help="Path to a .txt corpus file (default: built-in text)")
@@ -652,7 +603,6 @@ if __name__ == "__main__":
     tp.add_argument("--lr",          type=float, default=LEARNING_RATE)
     tp.add_argument("--batch-size",  type=int,   default=BATCH_SIZE)
 
-    # ── generate ──────────────────────────────────────────
     gp = sub.add_parser("generate", help="Generate text from a seed prompt")
     gp.add_argument("--seed",        type=str,   default="The sun rose over the",
                     help="Seed text to continue from")
@@ -661,7 +611,6 @@ if __name__ == "__main__":
     gp.add_argument("--temperature", type=float, default=0.8,
                     help="Sampling temperature (lower=focused, higher=creative)")
 
-    # ── visualize ─────────────────────────────────────────
     vp = sub.add_parser("visualize", help="Plot attention maps and training curves")
     vp.add_argument("--seed",  type=str, default="The sun rose over",
                     help="Short text to visualise attention for")

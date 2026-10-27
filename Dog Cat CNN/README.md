@@ -1,10 +1,10 @@
-# 🐾 Dog vs Cat CNN Classifier
+# Dog vs Cat CNN Classifier
 
 A self-contained **Convolutional Neural Network** that classifies images as **Dog** or **Cat** — everything in one Python file.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Dog Cat CNN/
@@ -27,7 +27,7 @@ Dog Cat CNN/
 
 ---
 
-## 🏗️ Model Architecture
+## ️ Model Architecture
 
 | Block   | Layer                          | Output Shape        |
 |---------|--------------------------------|---------------------|
@@ -46,7 +46,7 @@ Dog Cat CNN/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 pip install -r requirements.txt
@@ -63,7 +63,7 @@ python cnn_dog_cat.py predict --image my_pet.jpg --save-viz Output/result.png
 
 ---
 
-## ⚙️ Dataset Setup
+## ️ Dataset Setup
 
 | Option | How |
 |--------|-----|
@@ -73,7 +73,7 @@ python cnn_dog_cat.py predict --image my_pet.jpg --save-viz Output/result.png
 
 ---
 
-## 📊 Output Files
+## Output Files
 
 | File | Description |
 |------|-------------|
@@ -84,7 +84,7 @@ python cnn_dog_cat.py predict --image my_pet.jpg --save-viz Output/result.png
 
 ---
 
-## 📦 Requirements
+## Requirements
 
 ```
 tensorflow>=2.15.0
